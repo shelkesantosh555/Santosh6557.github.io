@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,  initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Area Volume Models</title>
+    <link rel="stylesheet" href="css/editor.css" type="text/css" />
+    <link rel="stylesheet" href="css/jquery-ui.css" type="text/css" />
+    <link rel="stylesheet" href="css/player.css" type="text/css" />
+    <script src="../../../mhe.shared-jquery-v2/jquery.min.js" type="text/javascript"></script>
+    <script src="../../../mhe.shared-widget-v1/widget.js" type="text/javascript"></script>
+    <script src="lib/jquery-ui/1.10.4/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+    <script src="lib/jquery-ui-touch-punch/0.2.2/jquery.ui.touch-punch.js" type="text/javascript"></script>
+    <script src="lib/three.js" type="text/javascript"></script>
+    <script src="lib/threex.domevent.js" type="text/javascript"></script>
+    
+    <script src="js/events.js" type="text/javascript"></script>
+    <script src="js/const.js" type="text/javascript"></script>
+    <!-- <script src="js/tracer.js" type="text/javascript"></script> -->
+    <script src="js/ddcomponent.js" type="text/javascript"></script>
+    <script src="js/colordd.js" type="text/javascript"></script>
+    <script src="js/navigation.js" type="text/javascript"></script>
+    <script src="js/area.js" type="text/javascript"></script>
+    <script src="js/volume.js" type="text/javascript"></script>
+    <script src="js/player.js" type="text/javascript"></script>
+    <script src="js/editor.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        function openCloseConfigurationPanel(action) {
+            if ($(".mainContent").hasClass("displayContainer") || action == "close") {
+                $(".mainContent").removeClass("displayContainer").addClass("hideContainer");
+            } else {
+                $(".mainContent").removeClass("hideContainer").addClass("displayContainer");
+            }
+            if ($(".tabsOpen").hasClass("highlight") || action == "close") {
+                $(".tabsOpen").removeClass("highlight");
+            } else {
+                $(".tabsOpen").addClass("highlight");
+            }
+
+        }
+        var configTabFlag = false;
+        function showHideConfig() {
+            if (configTabFlag) {
+                $('#mhe-area-volume-editor').css('display', 'none')
+                $('#closeButton').hide()
+                configTabFlag = false;
+                openCloseConfigurationPanel(null)
+                $("#editor_container .tabsOpen").removeClass("highlight");
+
+            }
+            else {
+                $('#closeButton').show()
+                $('#mhe-area-volume-editor').css('display', 'block')
+                openCloseConfigurationPanel(null)
+                configTabFlag = true;
+
+                $("#editor_container .tabsOpen").addClass("highlight");
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div id="stopwatch_tool_container">
+        <input type="hidden" name="isEdit" id="isEdit" value="true" />
+        <div class="layoutDisplayGrid">
+            <div class="layoutMobilePortrait bgLayout"><div class="bgTransparency bg"></div><label>Mobile Portrait</label></div>
+            <div class="layoutMobileLandScape bgLayout"><div class="bgTransparency bg"></div><label>Mobile LandScape</label></div>
+            <div class="layoutiPadPortrait bgLayout"><div class="bgTransparency bg"></div><label>iPad Portrait</label></div>
+            <div class="layoutiPadLandScape bgLayout"><div class="bgTransparency bg"></div><label>iPad LandScape</label></div>
+            <div class="layoutDesktop bgLayout"><div class="bgTransparency bg"></div><label>Desktop</label></div>
+        </div>
+        <div id="canvas_area_container_parent">
+            <div id="canvas_area_container">
+                <div class="main-canvas-area">
+                    <!-- container to hold tool -->
+                    <div class="mhe-tracer-etools">
+                        <div id="tool" class="toolContainer">
+                            <div id="areaVolumeTool">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="measures" class="measures-desktop">
+                    <div class="resultheading m-close" id="resultheading" tabindex="200" aria-label="Measures panel, Press enter or space to minimize the measures panel">Measures
+                        <span id="result_arrow_span" tabindex="200" aria-label="Press Enter or space button to hide or view measures">
+                            <img id="result_arrow" class="open-img" src="images/up_arrow.svg" alt="Up Arrow" />
+                            <img id="result_arrow1" class="close-img" src="images/down_arrow.svg" alt="down Arrow" />
+                        </span>
+                    </div>
+                    <div class="resultcontent" style="display: none;">
+                        <div class="" id="length">
+                            <label>
+                                <span id="check-length" class="cb clicked" tabindex="201" aria-label="Select or deselect the checkbox to see or hide the Length by pressing space or enter button."
+                                    title="Length"></span>
+                                <span tabindex="202" aria-label="Length">Length
+                                </span>
+                            </label>
+                            <ul style="list-style:none;" id="length-values" tabindex="203">
+                                <li></li>
+                            </ul>
+                        </div>
+                        <div class="" id="height">
+                            <label>
+                                <span id="check-height" class="cb clicked" tabindex="203" aria-label="Select or deselect the checkbox to see or hide the Height by pressing space or enter button."
+                                    title="Height"></span>
+                                <span tabindex="204" aria-label="Height">Height
+                                </span>
+                            </label>
+                            <ul style="list-style:none;" id="height-values" tabindex="205">
+                                <li></li>
+                            </ul>
+                        </div>
+                        <div class="" id="width">
+                            <label>
+                                <span id="check-width" class="cb clicked" tabindex="205" aria-label="Select or deselect the checkbox to see or hide the Width by pressing space or enter button."
+                                    title="Width"></span>
+                                <span tabindex="206" aria-label="Width">Width
+                                </span>
+                            </label>
+                            <ul style="list-style:none;" id="width-values" tabindex="207">
+                                <li></li>
+                            </ul>
+                        </div>
+                        <div class="" id="perimeter">
+                            <label>
+                                <span id="check-perimeter" class="cb clicked" tabindex="205" aria-label="Select or deselect the checkbox to see or hide the perimeter by pressing space or enter button."
+                                    title="perimeter"></span>
+                                <span tabindex="206" aria-label="perimeter">Perimeter</span>
+                            </label>
+                            <ul style="list-style:none;" id="perimeter-values" tabindex="207">
+                                <li></li>
+                            </ul>
+                        </div>
+                        <div class="" id="total">
+                            <label>
+                                <span id="check-total" class="cb clicked" tabindex="207" aria-label="Select or deselect the checkbox to see or hide the total by pressing space or enter button."
+                                    title="total"></span>
+                                <span class="total-span" tabindex="208" aria-label="total">Total
+                                </span>
+                            </label>
+                            <ul style="list-style:none;" id="total-values" tabindex="209">
+                                <li></li>
+                            </ul>
+                        </div>
+                        <div class="" id="filled">
+                            <label>
+                                <span id="check-filled" class="cb clicked" tabindex="205" aria-label="Select or deselect the checkbox to see or hide the filled by pressing space or enter button."
+                                    title="filled"></span>
+                                <span tabindex="206" class="filled-span" aria-label="filled">Filled
+                                </span>
+                            </label>
+                            <ul style="list-style:none;" id="filled-values" tabindex="207">
+                                <li></li>
+                            </ul>
+                        </div>
+                        <div class="" id="unfilled">
+                            <label>
+                                <span id="check-unfilled" class="cb clicked" tabindex="205" aria-label="Select or deselect the checkbox to see or hide the unfilled by pressing space or enter button."
+                                    title="unfilled"></span>
+                                <span tabindex="206" class="unfilled-span" aria-label="unfilled">Unfilled
+                                </span>
+                            </label>
+                            <ul style="list-style:none;" id="unfilled-values" tabindex="207">
+                                <li></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="measure_area">
+                <div id="controlContainer">
+                    <div class="mobile_controls-shape">
+                        <div class="shapes-dimensions-shape">
+                            <div class="shapes_small-shape">
+                                <div class="shapeHeading">
+                                    <span id="shape-close-span" style="float:right;margin-right:10px;" title="Hide shapes menu" tabindex="136" aria-label="Hide shapes menu, Press enter or space key to hide shapes menu">
+                                        <img style="cursor: pointer;" title="Hide shapes menu" id="shape-close" class="shapes_btn" src="images/down_arrow.svg" alt="Hide shapes menu" />
+                                    </span>
+                                </div>
+                                <div class="shape-div-small">
+                                </div>
+                                <div class="arrow_container" style="display: inline;">
+                                    <div class="arrow_top1"></div>
+                                    <div class="arrow_bottom1"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mobile_controls-shape-mobile">
+                        <div class="shapes-dimensions-shape-mobile">
+                            <div class="shapes_small-shape-mobile">
+                                <div class="shapeHeading-mobile">
+                                    <span id="shape-close-span-mobile" style="float:right;margin-right:10px;" title="Hide Setting options" tabindex="136" aria-label="Press enter or space to hide the setting options.">
+                                        <img style="cursor: pointer;" title="Hide Setting options" id="shape-close-mobile" class="shapes_btn" src="images/down_arrow.svg"
+                                            alt="Hide Setting options" />
+                                    </span>
+                                </div>
+                                <div class="shape-div-small-mobile">
+                                </div>
+                                <div class="arrow_container-mobile" style="display: inline;">
+                                    <div class="arrow_top1-mobile"></div>
+                                    <div class="arrow_bottom1-mobile"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mobile_controls-shape-mobile2">
+                        <div class="shapes-dimensions-shape-mobile2">
+                            <div class="shapes_small-shape-mobile2">
+                                <div class="shapeHeading-mobile2">
+                                    <span id="shape-close-span-mobile2" style="float:right;margin-right:10px;" title="Hide Setting options" tabindex="136" aria-label="Press enter or space to hide the setting options.">
+                                        <img style="cursor: pointer;" title="Hide Setting options" id="shape-close-mobile2" class="shapes_btn" src="images/down_arrow.svg"
+                                            alt="Hide Setting options" />
+                                    </span>
+                                </div>
+                                <div class="shape-div-small-mobile2">
+                                </div>
+                                <div class="arrow_container-mobile2" style="display: inline;">
+                                    <div class="arrow_top1-mobile2"></div>
+                                    <div class="arrow_bottom1-mobile2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="confirmOverlay">
+                <div id="confirmBox">
+                    <label class="head">Notification</label>
+                    <p id="overlayAlertText" class="" tabindex="15">Are you sure you want to reset the tool?
+                    </p>
+                    <div id="confirmButtons">
+                        <input class='btn btn_ok' type="button" tabindex="16" aria-label="Press the enter or space button for yes" title="Yes" value="Yes"
+                        />
+                        <input class='btn btn_cancel' type="button" tabindex="16" aria-label="Press the enter or space button for no" title="No"
+                            value="No" />
+                        <input class='btn btn_o' type="button" tabindex="16" aria-label="Press the enter or space button for ok" title="ok" value="Ok"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- index.html last  -->
+    <div id="editor_container" class="editor-con">
+        <div class="tabsOpen" onclick="javascript:showHideConfig()">
+            Config
+        </div>
+        <div class="tabsLayOut" onclick="javascript:toggleLayoutGrid()">Layout Grid </div>
+        <div id="mhe-area-volume-editor">
+            <div class="mainContent scrollable content">
+                <div class="col-md-12" style="margin-bottom: 10px;">
+                    <input type="checkbox" value="" name="applicationHeightCHK" id="applicationHeightCHK" data-id="applicationHeightCHK" />
+                    <label class="labelChk" for="applicationHeightCHK">
+                        <b>Max Widget Depth</b>
+                    </label>
+                    <input type="number" name="applicationHeightNumber" data-id="applicationHeight" id="applicationHeightNumber" disabled="disabled"
+                    /> minimum 400.
+                </div>
+                <div class="col-md-12" style="clear: both;margin-bottom: 10px;">
+                    <input type="checkbox" value="" id="HelpButton" name="HelpButton" />
+                    <label class="labelChk" for="HelpButton">
+                        <b>Help Button</b>
+                    </label>
+                </div>
+                <div class="col-md-12" style="float: left;margin-bottom: 10px;">
+                    <label class="labelChk">
+                        <b>Mode</b>
+                    </label>
+                    <ul>
+                        <li class="liClass">
+                            <div class="liClass-div">
+                                <ul class="marginFromLeft">
+                                    <li class="liClass">
+                                        <input type="checkbox" value="" id="Area" class="ModeOption-p" name="Area"  />
+                                        <label class="labelChk" for="Area">
+                                            <b>Area</b>
+                                        </label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="liClass-div li-right-div">
+                                <ul class="marginFromLeft">
+                                    <li class="liClass">
+                                        <input type="checkbox" value="" id="Volume" class="ModeOption-p" name="Volume" />
+                                        <label class="labelChk" for="Volume">
+                                            <b>Volume</b>
+                                        </label>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-12" style="float: left;margin-bottom: 10px;">
+                    <input type="checkbox" value="" id="Border_Colors" name="Border_Colors" checked="checked" />
+                    <label class="labelChk" for="Border_Colors">
+                        <b>Border Colors</b>
+                    </label>
+                    <div class="edit_subLabel">(
+                        <label id="Border_Colors_s_d">Deselect All</label>)</div>
+                    <ul class="marginFromLeft">
+                        <li class="liClass" style="float: left;margin-top: 10px;">
+                            <label class="labelChk">
+                                <b>Colors Available</b>
+                            </label>
+                            <div class="">
+                                <ul>
+                                    <li class="liClass">
+                                        <div class="liClass-div">
+                                            <ul class="marginFromLeft">
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Red" class="Border_Colors-p Colors_Available-p" name="Red" />
+                                                    <label class="labelChk" for="Red">
+                                                        <b>Red</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Orange" class="Border_Colors-p Colors_Available-p" name="Orange" />
+                                                    <label class="labelChk" for="Orange">
+                                                        <b>Orange</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Yellow" class="Border_Colors-p Colors_Available-p" name="Yellow" />
+                                                    <label class="labelChk" for="Yellow">
+                                                        <b>Yellow</b>
+                                                    </label>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="liClass-div li-right-div">
+                                            <ul class="marginFromLeft">
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Green" class="Border_Colors-p Colors_Available-p" name="Green" />
+                                                    <label class="labelChk" for="Green">
+                                                        <b>Green</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Blue" class="Border_Colors-p Colors_Available-p" name="Blue" />
+                                                    <label class="labelChk" for="Blue">
+                                                        <b>Blue</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Purple" class="Border_Colors-p Colors_Available-p" name="Purple" />
+                                                    <label class="labelChk" for="Purple">
+                                                        <b>Purple</b>
+                                                    </label>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="liClass-div li-last-div">
+                                            <ul class="marginFromLeft">
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Pink" class="Border_Colors-p Colors_Available-p" name="Pink" />
+                                                    <label class="labelChk" for="Pink">
+                                                        <b>Pink</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Black" class="Border_Colors-p Colors_Available-p" name="Black" />
+                                                    <label class="labelChk" for="Black">
+                                                        <b>Black</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Grey" class="Border_Colors-p Colors_Available-p" name="Grey" />
+                                                    <label class="labelChk" for="Grey">
+                                                        <b>Grey</b>
+                                                    </label>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="liClass" style="float: left;margin-top: 10px;">
+                            <label class="labelChk">
+                                <b>Default Color</b>
+                            </label>
+                            <div class="">
+                                <ul>
+                                    <li class="liClass">
+                                        <div class="liClass-div">
+                                            <ul class="marginFromLeft">
+                                                <li class="liClass">
+                                                    <input type="radio" value="" id="Red" class="Default_Colors-p" name="Default_Colors-r" />
+                                                    <label class="labelChk" for="Red">
+                                                        <b>Red</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="radio" value="" id="Orange" class="Default_Colors-p" name="Default_Colors-r" />
+                                                    <label class="labelChk" for="Orange">
+                                                        <b>Orange</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="radio" value="" id="Yellow" class="Default_Colors-p" name="Default_Colors-r" />
+                                                    <label class="labelChk" for="Yellow">
+                                                        <b>Yellow</b>
+                                                    </label>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="liClass-div li-right-div">
+                                            <ul class="marginFromLeft">
+                                                <li class="liClass">
+                                                    <input type="radio" value="" id="Green" class="Default_Colors-p" name="Default_Colors-r" />
+                                                    <label class="labelChk" for="Green">
+                                                        <b>Green</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="radio" value="" id="Blue" class="Default_Colors-p" name="Default_Colors-r" />
+                                                    <label class="labelChk" for="Blue">
+                                                        <b>Blue</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="radio" value="" id="Purple" class="Default_Colors-p" name="Default_Colors-r" />
+                                                    <label class="labelChk" for="Purple">
+                                                        <b>Purple</b>
+                                                    </label>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="liClass-div li-last-div">
+                                            <ul class="marginFromLeft">
+                                                <li class="liClass">
+                                                    <input type="radio" value="" id="Pink" class="Default_Colors-p" name="Default_Colors-r" />
+                                                    <label class="labelChk" for="Pink">
+                                                        <b>Pink</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="radio" value="" id="Black" class="Default_Colors-p" name="Default_Colors-r" />
+                                                    <label class="labelChk" for="Black">
+                                                        <b>Black</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="radio" value="" id="Grey" class="Default_Colors-p" name="Default_Colors-r" />
+                                                    <label class="labelChk" for="Grey">
+                                                        <b>Grey</b>
+                                                    </label>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-12" style="clear: both;margin-bottom: 10px;">
+                    <input type="checkbox" value="" id="LockUnlock" name="LockUnlock" />
+                    <label class="labelChk" for="LockUnlock">
+                        <b>Lock/Unlock Available?</b>
+                    </label>
+                </div>
+                <div class="col-md-12" style="float: left;margin-bottom: 10px;width: 100%;">
+                    <input type="checkbox" value="" id="Units" name="Units" />
+                    <label class="labelChk" for="Units">
+                        <b>Units</b>
+                    </label>
+                    <div class="edit_subLabel">(
+                        <label id="Units_s_d">Deselect All</label>)</div>
+                    <ul>
+                        <li class="liClass">
+                            <div class="liClass-div">
+                                <ul class="marginFromLeft">
+                                    <li class="liClass">
+                                        <input type="checkbox" value="" id="Add" class="Units-p" name="Add" />
+                                        <label class="labelChk" for="Add">
+                                            <b>Add</b>
+                                        </label>
+                                    </li>
+                                    <li class="liClass">
+                                        <input type="checkbox" value="" id="Remove" class="Units-p" name="Remove" />
+                                        <label class="labelChk" for="Remove">
+                                            <b>Remove</b>
+                                        </label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="liClass-div li-right-div">
+                                <ul class="marginFromLeft">
+                                    <li class="liClass">
+                                        <input type="checkbox" value="" id="Fill" class="Units-p" name="Fill" />
+                                        <label class="labelChk" for="Fill">
+                                            <b>Fill</b>
+                                        </label>
+                                    </li>
+                                    <li class="liClass">
+                                        <input type="checkbox" value="" id="Empty" class="Units-p" name="Empty" />
+                                        <label class="labelChk" for="Empty">
+                                            <b>Empty</b>
+                                        </label>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-12" style="margin-bottom: 10px;">
+                    <!-- <span style=" font-size: 12px; ">(If selected, the field will be locked in at the present number, or the default number of units)</span>
+                    <br/> -->
+                    <input type="checkbox" value="" name="qLockFlag" id="qLockFlag" data-id="qLockFlag" />
+                    <label class="labelChk" for="qLockFlag">
+                        <b>Number of units</b>
+                    </label>
+                    <input type="number" name="lockQuantityNumber" data-id="lockQuantity" id="lockQuantityNumber" disabled="disabled" value="1"
+                    />
+                </div>
+                <div class="col-md-12" style="float: left;margin-bottom: 10px;">
+                    <input type="checkbox" value="" id="Measures" name="Measures" checked="checked" />
+                    <label class="labelChk" for="Measures">
+                        <b>Measures</b>
+                    </label>
+                    <div class="edit_subLabel">(
+                        <label id="Measures_s_d">Deselect All</label>)</div>
+                    <ul class="marginFromLeft">
+                        <li class="liClass" style="float: left;margin-top: 10px;">
+                            <label class="labelChk">
+                                <b>Area</b>
+                            </label>
+                            <div class="">
+                                <ul>
+                                    <li class="liClass">
+                                        <div class="liClass-div">
+                                            <ul class="marginFromLeft">
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Length" class="Measures-p Area-p" name="Length" />
+                                                    <label class="labelChk" for="Length">
+                                                        <b>Length</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Width" class="Measures-p Area-p" name="Width" />
+                                                    <label class="labelChk" for="Width">
+                                                        <b>Width</b>
+                                                    </label>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="liClass-div">
+                                            <ul class="marginFromLeft">
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Perimeter" class="Measures-p Area-p" name="Perimeter" />
+                                                    <label class="labelChk" for="Perimeter">
+                                                        <b>Perimeter</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Total_Area" class="Measures-p Area-p" name="Total_Area" />
+                                                    <label class="labelChk" for="Total_Area">
+                                                        <b>Total Area</b>
+                                                    </label>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="liClass-div">
+                                            <ul class="marginFromLeft">
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Filled_Area" class="Measures-p Area-p" name="Filled_Area" />
+                                                    <label class="labelChk" for="Filled_Area">
+                                                        <b>Filled Area</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Unfilled_Area" class="Measures-p Area-p" name="Unfilled_Area" />
+                                                    <label class="labelChk" for="Unfilled_Area">
+                                                        <b>Unfilled Area</b>
+                                                    </label>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="liClass" style="float: left;margin-top: 10px;">
+                            <label class="labelChk">
+                                <b>Volume</b>
+                            </label>
+                            <div class="">
+                                <ul>
+                                    <li class="liClass">
+                                        <div class="liClass-div">
+                                            <ul class="marginFromLeft">
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Length" class="Measures-p Volume-p" name="Length" />
+                                                    <label class="labelChk" for="Length">
+                                                        <b>Length</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Width" class="Measures-p Volume-p" name="Width" />
+                                                    <label class="labelChk" for="Width">
+                                                        <b>Width</b>
+                                                    </label>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="liClass-div">
+                                            <ul class="marginFromLeft">
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Height" class="Measures-p Volume-p" name="Height" />
+                                                    <label class="labelChk" for="Height">
+                                                        <b>Height</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Total_Volume" class="Measures-p Volume-p" name="Total_Volume" />
+                                                    <label class="labelChk" for="Total_Volume">
+                                                        <b>Total Volume</b>
+                                                    </label>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="liClass-div">
+                                            <ul class="marginFromLeft">
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Filled_Volume" class="Measures-p Volume-p" name="Filled_Volume" />
+                                                    <label class="labelChk" for="Filled_Volume">
+                                                        <b>Filled Volume</b>
+                                                    </label>
+                                                </li>
+                                                <li class="liClass">
+                                                    <input type="checkbox" value="" id="Unfilled_Volume" class="Measures-p Volume-p" name="Unfilled_Volume" />
+                                                    <label class="labelChk" for="Unfilled_Volume">
+                                                        <b>Unfilled Volume</b>
+                                                    </label>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-12" style="float: left;margin-bottom: 10px;width: 100%;">
+                    <label class="labelChk">
+                        <b>Fill Order</b>
+                    </label>
+                    <ul>
+                        <li class="liClass">
+                            <div class="liClass-div">
+                                <ul class="marginFromLeft">
+                                    <li class="liClass">
+                                        <input type="radio" value="" id="AreaByColumn" name="AreaByColumnRow" />
+                                        <label class="labelChk" for="AreaByColumn">
+                                            <b>Area: By Columns</b>
+                                        </label>
+                                    </li>
+                                    <li class="liClass">
+                                        <input type="radio" value="" id="AreaByRow" name="AreaByColumnRow" />
+                                        <label class="labelChk" for="AreaByRow">
+                                            <b>Area: By Rows</b>
+                                        </label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="liClass-div li-right-div">
+                                <ul class="marginFromLeft">
+                                    <li class="liClass">
+                                        <input type="radio" value="" id="VolumeByColumn" name="VolumeByColumnRow" />
+                                        <label class="labelChk" for="VolumeByColumn">
+                                            <b>Volume: By Width</b>
+                                        </label>
+                                    </li>
+                                    <li class="liClass">
+                                        <input type="radio" value="" id="VolumeByRow" name="VolumeByColumnRow" />
+                                        <label class="labelChk" for="VolumeByRow">
+                                            <b>Volume: By Height</b>
+                                        </label>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-12" style="clear: both;margin-bottom: 10px;">
+                    <input type="checkbox" value="" id="Redo" name="Redo" />
+                    <label class="labelChk" for="Redo">
+                        <b>Redo</b>
+                    </label>
+                </div>
+                <div class="col-md-12" style="clear: both;margin-bottom: 10px;">
+                    <input type="checkbox" value="" id="Undo" name="Undo" />
+                    <label class="labelChk" for="Undo">
+                        <b>Undo</b>
+                    </label>
+                </div>
+                <div class="col-md-12" style="clear: both;margin-bottom: 10px;">
+                    <input type="checkbox" value="" id="Reset" name="Reset" />
+                    <label class="labelChk" for="Reset">
+                        <b>Reset</b>
+                    </label>
+                </div>
+            </div>
+            <!-- mhe-area-volume-editor -->
+        </div>
+        <!-- mainContent scrollable content -->
+    </div>
+</body>
+
+</html>

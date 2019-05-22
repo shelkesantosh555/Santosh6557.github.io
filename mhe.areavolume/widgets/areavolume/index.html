@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+      <meta name="viewport" content="width=device-width,  initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      <title>Area Volume Models</title>
+      <link rel="stylesheet" href="css/jquery-ui.css" type="text/css" />
+      <link rel="stylesheet" href="css/player.css" type="text/css" />
+      <!-- Required Jquery Libraries -->
+      <script src="../../../mhe.shared-jquery-v2/jquery.min.js" type="text/javascript"></script>
+      <script src="../../../mhe.shared-widget-v1/widget.js" type="text/javascript"></script>
+      <script src="lib/jquery-ui/1.10.4/jquery-ui-1.10.4.min.js" type="text/javascript"></script>
+      <script src="lib/jquery-ui-touch-punch/0.2.2/jquery.ui.touch-punch.js" type="text/javascript"></script>    
+
+      <script src="lib/three.js" type="text/javascript"></script>
+      <script src="lib/threex.domevent.js" type="text/javascript"></script>
+
+      <script src="js/events.js" type="text/javascript"></script>
+      <script src="js/const.js" type="text/javascript"></script> 
+      <!-- <script src="js/tracer.js" type="text/javascript"></script>    -->
+      <script src="js/ddcomponent.js" type="text/javascript"></script> 
+      <script src="js/colordd.js" type="text/javascript"></script> 
+      <script src="js/navigation.js" type="text/javascript"></script>  
+      <script src="js/area.js" type="text/javascript"></script>
+      <script src="js/volume.js" type="text/javascript"></script>
+      <script src="js/player.js" type="text/javascript"></script>
+      <style type="text/css">
+         /*html, body { padding: 0; margin: 0; height: 100%; }*/
+      </style>
+   </head>
+   <body>
+      <div id="stopwatch_tool_container" role="application">
+         <input type="hidden" name="isEdit" id="isEdit" value="false"/>
+         <div id="canvas_area_container_parent">
+            <div id="canvas_area_container">
+               <div class="main-canvas-area">
+                  <!-- container to hold tool -->
+                  <div class="mhe-tracer-etools">
+                    <div id="tool" class="toolContainer">
+                        <div id="areaVolumeTool">
+                        </div>
+                    </div>
+                  </div>
+               </div>
+               <div id="measures" class="measures-desktop">
+                  <div class="resultheading m-close" id="resultheading" tabindex="2000" aria-label="Measurement panel, press enter key to minimize the measurement panel." title="Measurement">Measurement
+                     <span id="result_arrow_span" tabindex="2001" aria-label="Hide measurement, Press enter key to hide the measurements.">
+                     <img id="result_arrow" class="open-img" src="images/up_arrow.svg" alt="Up Arrow" />
+                     <img id="result_arrow1" class="close-img" src="images/down_arrow.svg" alt="down Arrow" />
+                     </span>
+                  </div>
+                  <div class="resultcontent" style="display: none;">
+                     <div class="" id="length">
+                        <label>
+                        <span id="check-length" class="cb clicked" tabindex="2002" aria-label="Select or deselect the checkbox to see or hide the Length by pressing space or enter button." title="Length"></span>
+                        <span tabindex="2003" aria-label="Length">Length
+                        </span>
+                        </label>
+                        <ul style="list-style:none;" id="length-values" tabindex="2004">
+                           <li></li>
+                        </ul>
+                     </div>
+                     <div class="" id="height">
+                        <label>
+                        <span id="check-height" class="cb clicked" tabindex="2005" aria-label="Select or deselect the checkbox to see or hide the Height by pressing space or enter button." title="Height"></span>
+                        <span tabindex="2006" aria-label="Height">Height
+                        </span>
+                        </label>
+                        <ul style="list-style:none;" id="height-values" tabindex="2007">
+                           <li></li>
+                        </ul>
+                     </div>
+                     <div class="" id="width">
+                        <label>
+                        <span id="check-width" class="cb clicked" tabindex="2008" aria-label="Select or deselect the checkbox to see or hide the Width by pressing space or enter button." title="Width"></span>
+                        <span tabindex="2009" aria-label="Width">Width
+                        </span>
+                        </label>
+                        <ul style="list-style:none;" id="width-values" tabindex="2009">
+                           <li></li>
+                        </ul>
+                     </div>
+                     <div class="" id="perimeter">
+                        <label>
+                            <span id="check-perimeter" class="cb clicked" tabindex="2010" aria-label="Select or deselect the checkbox to see or hide the perimeter by pressing space or enter button."
+                                title="Perimeter"></span>
+                            <span tabindex="2011" aria-label="perimeter">Perimeter</span>
+                        </label>
+                        <ul style="list-style:none;" id="perimeter-values" tabindex="2012">
+                            <li></li>
+                        </ul>
+                     </div>
+                     <div class="" id="total">
+                        <label>
+                        <span id="check-total" class="cb clicked" tabindex="2013" aria-label="Select or deselect the checkbox to see or hide the total by pressing space or enter button." title="Total"></span>
+                        <span class="total-span" tabindex="2014" aria-label="total">Total 
+                        </span>
+                        </label>
+                        <ul style="list-style:none;" id="total-values" tabindex="2015">
+                           <li></li>
+                        </ul>
+                     </div>
+                     <div class="" id="filled">
+                        <label>
+                        <span id="check-filled" class="cb clicked" tabindex="2016" aria-label="Select or deselect the checkbox to see or hide the filled by pressing space or enter button." title="Filled"></span>
+                        <span tabindex="2017" class="filled-span" aria-label="filled">Filled
+                        </span>
+                        </label>
+                        <ul style="list-style:none;" id="filled-values" tabindex="2018">
+                           <li></li>
+                        </ul>
+                     </div>
+                     <div class="" id="unfilled">
+                        <label>
+                        <span id="check-unfilled" class="cb clicked" tabindex="2019" aria-label="Select or deselect the checkbox to see or hide the unfilled by pressing space or enter button." title="Unfilled"></span>
+                        <span tabindex="2020" class="unfilled-span" aria-label="unfilled">Unfilled
+                        </span>
+                        </label>
+                        <ul style="list-style:none;" id="unfilled-values" tabindex="2021">
+                           <li></li>
+                        </ul>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div id="measure_area">
+               <div id="controlContainer">
+                  <div class="mobile_controls-shape">
+                     <div class="shapes-dimensions-shape">
+                        <div class="shapes_small-shape">
+                           <div class="shapeHeading">
+                              <span id="shape-close-span" style="float:right;margin-right:10px;" tabindex="136" aria-label="Hide options menu, Press the enter key to hide options menu.">
+                              <img style="cursor: pointer;" id="shape-close" class="shapes_btn" src="images/down_arrow.svg" alt="Hide Options menu" />
+                              </span>
+                           </div>
+                           <div class="shape-div-small">
+                           </div>
+                           <div class="arrow_container" style="display: inline;">
+                              <div class="arrow_top1"></div>
+                              <div class="arrow_bottom1"></div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="mobile_controls-shape-mobile">
+                     <div class="shapes-dimensions-shape-mobile">
+                        <div class="shapes_small-shape-mobile">
+                           <div class="shapeHeading-mobile">
+                              <span id="shape-close-span-mobile" style="float:right;margin-right:10px;" title="Hide Setting options" tabindex="136" aria-label="Press enter or space to hide the setting options.">
+                              <img style="cursor: pointer;" title="Hide Setting options" id="shape-close-mobile" class="shapes_btn" src="images/down_arrow.svg" alt="Hide Setting options"  />
+                              </span>
+                           </div>
+                           <div class="shape-div-small-mobile">
+                           </div>
+                           <div class="arrow_container-mobile" style="display: inline;">
+                              <div class="arrow_top1-mobile"></div>
+                              <div class="arrow_bottom1-mobile"></div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="mobile_controls-shape-mobile2">
+                     <div class="shapes-dimensions-shape-mobile2">
+                        <div class="shapes_small-shape-mobile2">
+                           <div class="shapeHeading-mobile2">
+                              <span id="shape-close-span-mobile2" style="float:right;margin-right:10px;" title="Hide Setting options" tabindex="136" aria-label="Press enter or space to hide the setting options.">
+                              <img style="cursor: pointer;" title="Hide Setting options" id="shape-close-mobile2" class="shapes_btn" src="images/down_arrow.svg" alt="Hide Setting options" />
+                              </span>
+                           </div>
+                           <div class="shape-div-small-mobile2">
+                           </div>
+                           <div class="arrow_container-mobile2" style="display: inline;">
+                              <div class="arrow_top1-mobile2"></div>
+                              <div class="arrow_bottom1-mobile2"></div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div id="confirmOverlay">
+               <div id="confirmBox">
+                  <label class="head">Notification</label>
+                  <p id="overlayAlertText" class="" tabindex="2030">Are you sure you want to reset the tool?
+                  </p>
+                  <div id="confirmButtons">
+                     <input class='btn btn_ok' type="button" tabindex="2031" aria-label="Press the enter or space button for yes" title="Yes" value="Yes" />
+                     <input class='btn btn_cancel' type="button" tabindex="2032" aria-label="Press the enter or space button for no" title="No" value="No" />
+                     <input class='btn btn_o' type="button" tabindex="2033" aria-label="Press the enter or space button for ok" title="ok" value="Ok" />
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </body>
+</html>
