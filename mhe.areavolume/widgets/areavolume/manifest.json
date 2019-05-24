@@ -3,11 +3,9 @@
             "included": [
 
                   "index.html",
-
                   "css/global.css",
                   "css/jquery-ui.css",
                   "css/player.css",
-
                   "fonts/proximanova-regular.eot",
                   "fonts/proximanova-regular.svg",
                   "fonts/proximanova-regular.ttf",
